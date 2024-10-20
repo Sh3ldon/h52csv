@@ -3,8 +3,7 @@ import pandas as pd
 import sys
 import tkinter as tk
 from tkinter import filedialog
-
-
+from tkinter import ttk
 
 def convert_h5_data_to_dataframe(data, columns_to_export):
     list_of_dataframes = []
@@ -30,15 +29,27 @@ def open_file_dialog():
 
 def process_file(file_path):
     try:
+        print("READING H5 FILE.")
         data = h5py.File(file_path)
 
-        columns_to_export = data.keys()
+        columns_in_file = [key for key in data.keys()]
+
         file_text.delete('1.0', tk.END)
-        file_text.insert(tk.END, columns_to_export)
+        file_text.insert(tk.END, columns_in_file)
+        
+        if len(sys.argv) > 1:
+            columns_to_export = eval(sys.argv[1])
+            for column in columns_to_export:
+                if column not in columns_in_file:
+                    print("INVALID COLUMN NOT PRESENT IN FILE. EXPORTING ALL COLUMNS INSTEAD.")
+                    columns_to_export = columns_in_file
+        else:
+            print("COLUMNS UNSPECIFIED: EXPORTING ALL COLUMNS.")
+            columns_to_export = columns_in_file
 
         output_filename = file_path.split('.')[0]+'.csv'
-        columns_to_export=eval(sys.argv[1])
-        print("Exporting columns: ", columns_to_export)
+
+
         df = convert_h5_data_to_dataframe(data, columns_to_export)
         df.to_csv(output_filename)
     except Exception as e:
@@ -49,21 +60,21 @@ def process_file(file_path):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) > 1:
-        root = tk.Tk()
-        root.title("SELECT H5 FILE TO CONVERT")
+    root = tk.Tk()
+    root.title("SELECT H5 FILE TO CONVERT")
 
-        open_button = tk.Button(root, text="Open File", command=open_file_dialog)
-        open_button.pack(padx=20, pady=20)
 
-        selected_file_label = tk.Label(root, text="Selected File:")
-        selected_file_label.pack()
 
-        file_text = tk.Text(root, wrap=tk.WORD, height=10, width=40)
-        file_text.pack(padx=20, pady=20)
+    open_button = tk.Button(root, text="Open File", command=open_file_dialog)
+    open_button.pack(padx=20, pady=20)
 
-        root.mainloop()
-    else:
-        print("Columns to export are not specified")
+    selected_file_label = tk.Label(root, text="Selected File:")
+    selected_file_label.pack()
+
+    file_text = tk.Text(root, wrap=tk.WORD, height=10, width=40)
+    file_text.pack(padx=20, pady=20)
+
+    root.mainloop()
+
 
 
