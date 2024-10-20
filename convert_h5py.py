@@ -3,7 +3,6 @@ import pandas as pd
 import sys
 import tkinter as tk
 from tkinter import filedialog
-from tkinter import ttk
 
 def convert_h5_data_to_dataframe(data, columns_to_export):
     list_of_dataframes = []
